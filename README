@@ -1,0 +1,87 @@
+This is a very rough proof-of-concept Bluetooth keyboard wedge.  Keyboard
+wedges are needed by barcode scanners and other devices to send keycodes
+to the currently-focused EditText.  In Android, the only way to do this is
+with a hardware HID device, or a "soft keyboard" input method.  So you
+will see a lot of ugly-looking soft keyboards in Google Play designed to
+work with a particular barcode scanner.
+
+But what if you like the default Google Keyboard and you don't want to
+switch to a different soft keyboard just so you can use a barcode scanner?
+That's the problem this project is intended to solve.
+
+Using an Adafruit Feather 32u4 Bluefruit LE, we can send the keystrokes to
+the Bluefruit's UART service, and the custom Arduino sketch will re-send
+those characters back on the HID service.
+
+Pretty simple in concept, but kind of hard to implement, because once
+the HID keyboard is connected to Android, the Bluefruit is no longer
+discoverable, so we have do it in several steps:
+
+    1. Pair the Bluefruit as an HID keyboard to the Android device,
+       but don't connect yet.
+
+    2. Connect to the Bluefruit's UART service using the Android app.
+
+    3. Connect the Bluefruit as an HID keyboard.
+
+    4. Send keystrokes to the UART, which are then echoed back through HID.
+
+In the future, I can think of two ways to make this process simpler to set up:
+
+    1. Use two separate Bluetooth devices, one for UART and one for HID,
+       connected through a serial line.  Then we could connect to both
+       Bluetooth devices at the same time.
+
+    2. Have a background service that listens for HID Bluetooth connections,
+       and saves the address.  When the keyboard wedge needs to be enabled,
+       use the saved address to connect to the device's UART service.
+
+Installation Instructions
+-------------------------
+
+1. Acquire an Adafruit Feather 32u4 Bluefruit LE, or similar Bluefruit device.
+
+2. Install the Arduino IDE and the Adafruit BLE library:
+
+   * https://learn.adafruit.com/adafruit-feather-32u4-bluefruit-le/setup
+   * https://learn.adafruit.com/adafruit-feather-32u4-bluefruit-le/using-with-arduino-ide
+   * https://learn.adafruit.com/adafruit-feather-32u4-bluefruit-le/installing-ble-library
+
+3. Install the "keyboardwedge" sketch from this repository.
+
+3. Upload the "keyboardwedge" sketch to the Bluefruit device.
+
+4. Compile and install the "Bluefruit LE" app, which can be found in the
+   "Bluefruit_LE_Connect_Android" directory.
+
+Testing Instructions
+--------------------
+
+    1. Pair the Bluefruit as an HID keyboard to the Android device,
+       but don't connect yet.  (On my device the only way to do this is
+       to connect and then disconnect.)
+
+    2. Connect to the Bluefruit's UART service using the "Bluefruit LE"
+       Android app.
+
+    3. Go back to Bluetooth settings and connect the Bluefruit as an
+       HID keyboard.
+
+    4. Go back to "Bluefruit LE" and send keystrokes to the UART service,
+       which will be echoed back through HID.  You can also use the
+       Arduino IDE's "Serial Monitor" to send keystrokes to the Bluefruit's
+       serial port, which will also be send back through HID.
+
+License
+-------
+
+All the source code came from Adafruit; I just modified it a little bit. Some
+of the source files use the MIT license, while others use the BSD license.
+
+Author
+------
+
+This project was conceived of and put together by Fred Long of SDG Systems, LLC.
+
+flong@sdgsystems.com
+
